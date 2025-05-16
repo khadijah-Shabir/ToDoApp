@@ -1,0 +1,21 @@
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-green">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">Todo-App</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#nav" aria-controls="nav" aria-expanded="false">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="nav">
+      <button class="btn btn-outline-light" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+
+<!-- EVERYTHING under navbar renders here -->
+<router-outlet></router-outlet>
+
+

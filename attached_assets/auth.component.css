@@ -1,0 +1,74 @@
+
+
+
+
+/* src/app/components/auth/auth.component.css */
+
+:root {
+  --primary-green: #0d5a2b;
+  --primary-green-hover: #08743b;
+  --black: #000;
+  --white: #fff;
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--primary-green) 0%, #021b0e 100%);
+  padding: 1rem;
+  margin: auto;
+   
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  border-color: #0d5a2b;
+  border: 2px solid darkblue;
+  border-radius: 1rem;
+
+}
+
+.app-title {
+  color: darkblue;
+  font-weight: 700;
+  margin-bottom: .5rem;
+
+}
+
+.subtitle {
+  color: var(--black);
+  margin-bottom: 2rem;
+
+}
+
+.btn-google {
+  background: darkblue;
+  color: white;
+  border: 2px solid white;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+
+@media (max-width: 576px) {
+  .auth-card {
+    padding: 2rem 1.5rem;
+  }
+}
+
+
+
+
+
