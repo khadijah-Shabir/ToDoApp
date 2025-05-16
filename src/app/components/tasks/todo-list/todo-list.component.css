@@ -1,0 +1,59 @@
+.btn-outline-primary.active, .btn-outline-primary:active {
+  background-color: darkblue !important;
+  border-color: darkblue !important;
+}
+
+.btn-primary {
+  background-color: darkblue !important;
+  border-color: darkblue !important;
+}
+
+.table-success {
+  background-color: rgba(13, 90, 43, 0.1) !important;
+}
+
+.modal-header {
+  background-color: darkblue !important;
+}
+
+.notes-box {
+  background: #f8f9fa;
+  padding: .5rem .75rem;
+  border-left: 3px solid darkblue;
+  border-radius: .25rem;
+  font-size: .9rem;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.text-truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-dialog {
+  max-width: 500px;
+}
+
+@media (max-width: 768px) {
+  .btn-group {
+    display: flex;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .dropdown {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .dropdown button {
+    width: 100%;
+    text-align: left;
+  }
+}

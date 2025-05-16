@@ -1,0 +1,141 @@
+<div class="main-content">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2 class="mb-0">My Tasks</h2>
+        <p class="text-muted">Manage your tasks and stay organized</p>
+      </div>
+      <div class="col-md-4 d-flex justify-content-md-end align-items-center">
+        <button class="btn btn-success" (click)="createTask()">
+          <i class="bi bi-plus-circle me-2"></i> Add New Task
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters and sorting -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn" [class.btn-primary]="filterStatus === 'all'" [class.btn-outline-primary]="filterStatus !== 'all'" (click)="changeFilter('all')">
+            All Tasks
+          </button>
+          <button type="button" class="btn" [class.btn-primary]="filterStatus === 'active'" [class.btn-outline-primary]="filterStatus !== 'active'" (click)="changeFilter('active')">
+            Active
+          </button>
+          <button type="button" class="btn" [class.btn-primary]="filterStatus === 'completed'" [class.btn-outline-primary]="filterStatus !== 'completed'" (click)="changeFilter('completed')">
+            Completed
+          </button>
+        </div>
+      </div>
+      <div class="col-md-6 d-flex justify-content-md-end">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Sort By: {{ sortField.charAt(0).toUpperCase() + sortField.slice(1) }} ({{ sortDirection === 'asc' ? 'Ascending' : 'Descending' }})
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+            <li><a class="dropdown-item" href="javascript:void(0)" (click)="changeSort('title')">Title</a></li>
+            <li><a class="dropdown-item" href="javascript:void(0)" (click)="changeSort('date')">Date</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="d-flex justify-content-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- No tasks message -->
+    <div *ngIf="!loading && filteredTasks.length === 0" class="text-center my-5">
+      <div class="mb-3">
+        <i class="bi bi-clipboard-check" style="font-size: 3rem; color: #ccc;"></i>
+      </div>
+      <h4 class="text-muted">No tasks found</h4>
+      <p>Get started by adding a new task</p>
+      <button class="btn btn-success mt-2" (click)="createTask()">
+        <i class="bi bi-plus-circle me-2"></i> Add New Task
+      </button>
+    </div>
+
+    <!-- Task list -->
+    <div *ngIf="!loading && filteredTasks.length > 0" class="row">
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width: 50px;"></th>
+                <th style="width: 30%;">Title</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Description</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let task of filteredTasks" (click)="showTaskDetails(task)" style="cursor: pointer;" [class.table-success]="task.completed">
+                <td>
+                  <div class="form-check" (click)="$event.stopPropagation()">
+                    <input class="form-check-input" type="checkbox" [checked]="task.completed" (change)="toggleCompletion(task, $event)" id="task-{{task.id}}">
+                  </div>
+                </td>
+                <td>
+                  <span [class.text-decoration-line-through]="task.completed">{{ task.title }}</span>
+                </td>
+                <td>{{ formatDate(task.date) }}</td>
+                <td>{{ task.startTime }} - {{ task.endTime }}</td>
+                <td class="text-truncate" style="max-width: 200px;">{{ task.description }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-1" (click)="editTask(task); $event.stopPropagation()">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteTask(task, $event)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Details Modal -->
+<div class="modal fade" [class.show]="selectedTask" [style.display]="selectedTask ? 'block' : 'none'" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModal" [attr.aria-hidden]="!selectedTask">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" *ngIf="selectedTask">
+      <div class="modal-header text-white">
+        <h5 class="modal-title" id="taskDetailsModal">Task Details</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeTaskDetails()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h4 class="card-title mb-3">{{ selectedTask.title }} 
+          <span *ngIf="selectedTask.completed" class="badge bg-success ms-2">Completed</span>
+          <span *ngIf="!selectedTask.completed" class="badge bg-warning ms-2">Active</span>
+        </h4>
+        
+        <p><strong>Date:</strong> {{ formatDate(selectedTask.date) }}</p>
+        <p><strong>Time:</strong> {{ selectedTask.startTime }} - {{ selectedTask.endTime }}</p>
+        
+        <h5 class="mt-3">Description</h5>
+        <p>{{ selectedTask.description }}</p>
+        
+        <div *ngIf="selectedTask.notes" class="notes-box mt-3">
+          <h6>Notes</h6>
+          <p class="mb-0">{{ selectedTask.notes }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeTaskDetails()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="editTask(selectedTask); closeTaskDetails()">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="selectedTask" (click)="closeTaskDetails()"></div>
