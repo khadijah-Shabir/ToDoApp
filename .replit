@@ -21,8 +21,8 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd src && npm install --legacy-peer-deps && ng serve --host 0.0.0.0 --port 5000"
+args = "cd src && node main-app.js"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "cd src && npm install --legacy-peer-deps && ng serve --host 0.0.0.0 --port 5000"]
+run = ["sh", "-c", "cd src && node main-app.js"]

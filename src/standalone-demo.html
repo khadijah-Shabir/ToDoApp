@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
+  <style>
+    :root {
+      --primary-color: darkblue;
+      --primary-hover: #08743b;
+      --white: #fff;
+      --black: #000;
+      --light-gray: #f8f9fa;
+      --border-color: #dee2e6;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+    }
+    
+    .bg-green { 
+      background-color: darkblue !important; 
+    }
+    
+    .btn-primary, .btn-success {
+      background-color: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+    }
+    
+    .btn-primary:hover, .btn-success:hover {
+      background-color: var(--primary-hover) !important;
+      border-color: var(--primary-hover) !important;
+    }
+    
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    
+    .card {
+      border-radius: 0.5rem;
+      border: none;
+    }
+    
+    .shadow-sm {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+    
+    .shadow-lg {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .cursor-pointer {
+      cursor: pointer;
+    }
+    
+    .form-label {
+      font-weight: 500;
+    }
+    
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, darkblue 0%, #021b0e 100%);
+      padding: 1rem;
+      margin: auto;
+    }
+    
+    .auth-card {
+      background: var(--white);
+      border-radius: 1rem;
+      padding: 3rem 2rem;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      border: 2px solid darkblue;
+      border-radius: 1rem;
+    }
+    
+    .app-title {
+      color: darkblue;
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+    
+    .subtitle {
+      color: var(--black);
+      margin-bottom: 2rem;
+    }
+    
+    .btn-google {
+      background: darkblue;
+      color: white;
+      border: 2px solid white;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    main {
+      display: none;
+    }
+    
+    .active {
+      display: block;
+    }
+    
+    .table-success {
+      background-color: rgba(13, 90, 43, 0.1) !important;
+    }
+
+    .modal-header {
+      background-color: darkblue !important;
+      color: white;
+    }
+
+    .notes-box {
+      background: #f8f9fa;
+      padding: .5rem .75rem;
+      border-left: 3px solid darkblue;
+      border-radius: .25rem;
+      font-size: .9rem;
+    }
+
+    .invalid-feedback {
+      display: none;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: #dc3545;
+    }
+
+    .form-control.is-invalid ~ .invalid-feedback {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Page -->
+  <div id="auth-page">
+    <section class="vh-100">
+      <div class="container-fluidh-100">
+        <div class="row d-flex align-items-center justify-content-center h-100">
+          <div class="col-md-8 col-lg-7 col-xl-6">
+            <img
+              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+              class="img-fluid"
+              alt="Phone image"
+            />
+          </div>
+          <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+            <div class="auth-wrapper">
+              <div class="auth-card shadow-lg">
+                <h1 class="app-title">TodoApp</h1>
+                <p class="subtitle">Sign in to manage your tasks</p>
+
+                <button class="btn btn-google w-100" id="login-btn">
+                  Sign in with Google
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Main Application -->
+  <main id="app-main">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-green">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">Todo-App</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#nav" aria-controls="nav" aria-expanded="false">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="nav">
+          <button class="btn btn-outline-light" id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Task List View -->
+    <div id="task-list-view" class="active">
+      <div class="main-content">
+        <div class="container">
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <h2 class="mb-0">My Tasks</h2>
+              <p class="text-muted">Manage your tasks and stay organized</p>
+            </div>
+            <div class="col-md-4 d-flex justify-content-md-end align-items-center">
+              <button class="btn btn-success" id="create-task-btn">
+                <i class="bi bi-plus-circle me-2"></i> Add New Task
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters and sorting -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary filter-btn" data-filter="all">
+                  All Tasks
+                </button>
+                <button type="button" class="btn btn-outline-primary filter-btn" data-filter="active">
+                  Active
+                </button>
+                <button type="button" class="btn btn-outline-primary filter-btn" data-filter="completed">
+                  Completed
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end">
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  Sort By: Date (Ascending)
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                  <li><a class="dropdown-item sort-option" href="#" data-sort="title">Title</a></li>
+                  <li><a class="dropdown-item sort-option" href="#" data-sort="date">Date</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task list -->
+          <div class="row" id="task-list-container">
+            <div class="col-12">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;"></th>
+                      <th style="width: 30%;">Title</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Description</th>
+                      <th style="width: 120px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="task-list-body">
+                    <!-- Tasks will be added here dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- No tasks message -->
+          <div id="no-tasks-message" class="text-center my-5">
+            <div class="mb-3">
+              <i class="bi bi-clipboard-check" style="font-size: 3rem; color: #ccc;"></i>
+            </div>
+            <h4 class="text-muted">No tasks found</h4>
+            <p>Get started by adding a new task</p>
+            <button class="btn btn-success mt-2" id="no-tasks-add-btn">
+              <i class="bi bi-plus-circle me-2"></i> Add New Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Create/Edit View -->
+    <div id="task-create-view">
+      <div class="main-content">
+        <div class="container">
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <h2 id="form-title">Create New Task</h2>
+              <p class="text-muted" id="form-subtitle">Add a new task to your list</p>
+            </div>
+          </div>
+
+          <!-- Task form -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <form id="task-form">
+                    <input type="hidden" id="task-id" value="">
+                    
+                    <div class="row mb-3">
+                      <div class="col-md-12">
+                        <label for="title" class="form-label">Task Title*</label>
+                        <input 
+                          type="text" 
+                          class="form-control" 
+                          id="title" 
+                          placeholder="What needs to be done?"
+                          required
+                        >
+                        <div class="invalid-feedback">
+                          Title is required
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                      <div class="col-md-12">
+                        <label for="description" class="form-label">Description*</label>
+                        <textarea 
+                          class="form-control" 
+                          id="description" 
+                          rows="3" 
+                          placeholder="Describe your task"
+                          required
+                        ></textarea>
+                        <div class="invalid-feedback">
+                          Description is required
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                      <div class="col-md-4">
+                        <label for="date" class="form-label">Date*</label>
+                        <input 
+                          type="date" 
+                          class="form-control" 
+                          id="date" 
+                          required
+                        >
+                        <div class="invalid-feedback">
+                          Date is required
+                        </div>
+                      </div>
+                      
+                      <div class="col-md-4">
+                        <label for="startTime" class="form-label">Start Time*</label>
+                        <input 
+                          type="time" 
+                          class="form-control" 
+                          id="startTime" 
+                          value="09:00"
+                          required
+                        >
+                        <div class="invalid-feedback">
+                          Start time is required
+                        </div>
+                      </div>
+                      
+                      <div class="col-md-4">
+                        <label for="endTime" class="form-label">End Time*</label>
+                        <input 
+                          type="time" 
+                          class="form-control" 
+                          id="endTime" 
+                          value="10:00"
+                          required
+                        >
+                        <div class="invalid-feedback">
+                          End time is required
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                      <div class="col-md-12">
+                        <label for="notes" class="form-label">Notes (Optional)</label>
+                        <textarea 
+                          class="form-control" 
+                          id="notes" 
+                          rows="2" 
+                          placeholder="Any additional notes or reminders"
+                        ></textarea>
+                      </div>
+                    </div>
+                    
+                    <div class="row mb-3" id="completed-container" style="display: none;">
+                      <div class="col-md-12">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="completed">
+                          <label class="form-check-label" for="completed">
+                            Mark as completed
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                      <button type="button" class="btn btn-outline-secondary me-2" id="cancel-btn">Cancel</button>
+                      <button type="submit" class="btn btn-success" id="submit-btn">Create Task</button>
+                    </div>
+                    
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div class="modal fade" id="task-details-modal" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header text-white">
+            <h5 class="modal-title" id="taskDetailsModal">Task Details</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <h4 class="card-title mb-3" id="detail-title">Task Title 
+              <span id="detail-status-completed" class="badge bg-success ms-2" style="display: none;">Completed</span>
+              <span id="detail-status-active" class="badge bg-warning ms-2" style="display: none;">Active</span>
+            </h4>
+            
+            <p><strong>Date:</strong> <span id="detail-date"></span></p>
+            <p><strong>Time:</strong> <span id="detail-time"></span></p>
+            
+            <h5 class="mt-3">Description</h5>
+            <p id="detail-description"></p>
+            
+            <div id="detail-notes-container" class="notes-box mt-3" style="display: none;">
+              <h6>Notes</h6>
+              <p class="mb-0" id="detail-notes"></p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="detail-edit-btn">Edit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- JavaScript for our Todo App -->
+  <script>
+    // Demo data for tasks
+    let tasks = [
+      {
+        id: '1',
+        title: 'Complete project report',
+        description: 'Finish the quarterly project report with all metrics and analytics',
+        date: '2025-05-20',
+        startTime: '09:00',
+        endTime: '12:00',
+        notes: 'Remember to include the new conversion metrics',
+        completed: false
+      },
+      {
+        id: '2',
+        title: 'Meeting with client',
+        description: 'Discuss the new requirements and timeline for the project',
+        date: '2025-05-18',
+        startTime: '14:00',
+        endTime: '15:30',
+        notes: '',
+        completed: true
+      },
+      {
+        id: '3',
+        title: 'Review pull requests',
+        description: 'Go through and approve the pending pull requests from the team',
+        date: '2025-05-17',
+        startTime: '10:00',
+        endTime: '11:30',
+        notes: 'Focus on the authentication module PRs first',
+        completed: false
+      }
+    ];
+    
+    let currentFilter = 'all';
+    let sortField = 'date';
+    let sortDirection = 'asc';
+    let editingTaskId = null;
+    
+    // DOM Elements
+    const authPage = document.getElementById('auth-page');
+    const appMain = document.getElementById('app-main');
+    const taskListView = document.getElementById('task-list-view');
+    const taskCreateView = document.getElementById('task-create-view');
+    const taskListBody = document.getElementById('task-list-body');
+    const noTasksMessage = document.getElementById('no-tasks-message');
+    const taskListContainer = document.getElementById('task-list-container');
+    
+    // Buttons
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const createTaskBtn = document.getElementById('create-task-btn');
+    const noTasksAddBtn = document.getElementById('no-tasks-add-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const detailEditBtn = document.getElementById('detail-edit-btn');
+    
+    // Form elements
+    const taskForm = document.getElementById('task-form');
+    const formTitle = document.getElementById('form-title');
+    const formSubtitle = document.getElementById('form-subtitle');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    const taskIdInput = document.getElementById('task-id');
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const dateInput = document.getElementById('date');
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+    const notesInput = document.getElementById('notes');
+    const completedInput = document.getElementById('completed');
+    const completedContainer = document.getElementById('completed-container');
+    
+    // Detail modal elements
+    const taskDetailsModal = new bootstrap.Modal(document.getElementById('task-details-modal'));
+    const detailTitle = document.getElementById('detail-title');
+    const detailDate = document.getElementById('detail-date');
+    const detailTime = document.getElementById('detail-time');
+    const detailDescription = document.getElementById('detail-description');
+    const detailNotes = document.getElementById('detail-notes');
+    const detailNotesContainer = document.getElementById('detail-notes-container');
+    const detailStatusCompleted = document.getElementById('detail-status-completed');
+    const detailStatusActive = document.getElementById('detail-status-active');
+    
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the app
+      showAuthPage();
+      
+      // Login
+      loginBtn.addEventListener('click', function() {
+        // Simulate login
+        showAppMain();
+        renderTasks();
+      });
+      
+      // Logout
+      logoutBtn.addEventListener('click', function() {
+        showAuthPage();
+      });
+      
+      // Create task
+      createTaskBtn.addEventListener('click', function() {
+        showTaskCreateView();
+      });
+      
+      // No tasks add button
+      noTasksAddBtn.addEventListener('click', function() {
+        showTaskCreateView();
+      });
+      
+      // Cancel task create/edit
+      cancelBtn.addEventListener('click', function() {
+        showTaskListView();
+      });
+      
+      // Submit task form
+      taskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate form
+        if (!taskForm.checkValidity()) {
+          // Mark fields as invalid
+          if (!titleInput.value) titleInput.classList.add('is-invalid');
+          if (!descriptionInput.value) descriptionInput.classList.add('is-invalid');
+          if (!dateInput.value) dateInput.classList.add('is-invalid');
+          if (!startTimeInput.value) startTimeInput.classList.add('is-invalid');
+          if (!endTimeInput.value) endTimeInput.classList.add('is-invalid');
+          
+          return;
+        }
+        
+        // Get form data
+        const taskData = {
+          title: titleInput.value,
+          description: descriptionInput.value,
+          date: dateInput.value,
+          startTime: startTimeInput.value,
+          endTime: endTimeInput.value,
+          notes: notesInput.value,
+          completed: completedInput.checked
+        };
+        
+        if (editingTaskId) {
+          // Update existing task
+          updateTask(editingTaskId, taskData);
+        } else {
+          // Create new task
+          createTask(taskData);
+        }
+        
+        // Reset and go back to list
+        resetForm();
+        showTaskListView();
+      });
+      
+      // Detail edit button
+      detailEditBtn.addEventListener('click', function() {
+        const taskId = detailEditBtn.dataset.taskId;
+        taskDetailsModal.hide();
+        editTask(taskId);
+      });
+      
+      // Filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const filter = this.dataset.filter;
+          currentFilter = filter;
+          
+          // Update active button
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-outline-primary');
+          });
+          this.classList.remove('btn-outline-primary');
+          this.classList.add('btn-primary');
+          
+          renderTasks();
+        });
+      });
+      
+      // Sort options
+      document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+          e.preventDefault();
+          const field = this.dataset.sort;
+          
+          if (sortField === field) {
+            // Toggle direction
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortField = field;
+            sortDirection = 'asc';
+          }
+          
+          // Update dropdown text
+          document.getElementById('sortDropdown').textContent = 
+            `Sort By: ${capitalize(sortField)} (${sortDirection === 'asc' ? 'Ascending' : 'Descending'})`;
+          
+          renderTasks();
+        });
+      });
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+    });
+    
+    // Functions
+    function showAuthPage() {
+      authPage.style.display = 'block';
+      appMain.style.display = 'none';
+    }
+    
+    function showAppMain() {
+      authPage.style.display = 'none';
+      appMain.style.display = 'block';
+      showTaskListView();
+    }
+    
+    function showTaskListView() {
+      taskListView.classList.add('active');
+      taskCreateView.classList.remove('active');
+      renderTasks();
+    }
+    
+    function showTaskCreateView() {
+      taskListView.classList.remove('active');
+      taskCreateView.classList.add('active');
+    }
+    
+    function renderTasks() {
+      // Filter tasks
+      let filteredTasks = [...tasks];
+      if (currentFilter !== 'all') {
+        const isCompleted = currentFilter === 'completed';
+        filteredTasks = tasks.filter(task => task.completed === isCompleted);
+      }
+      
+      // Sort tasks
+      filteredTasks.sort((a, b) => {
+        let valA = a[sortField];
+        let valB = b[sortField];
+        
+        // String comparison
+        if (typeof valA === 'string') {
+          if (sortDirection === 'asc') {
+            return valA.localeCompare(valB);
+          } else {
+            return valB.localeCompare(valA);
+          }
+        }
+        
+        // Number comparison
+        if (sortDirection === 'asc') {
+          return valA - valB;
+        } else {
+          return valB - valA;
+        }
+      });
+      
+      // Show/hide no tasks message
+      if (filteredTasks.length === 0) {
+        noTasksMessage.style.display = 'block';
+        taskListContainer.style.display = 'none';
+      } else {
+        noTasksMessage.style.display = 'none';
+        taskListContainer.style.display = 'block';
+      }
+      
+      // Clear table
+      taskListBody.innerHTML = '';
+      
+      // Add tasks to table
+      filteredTasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.classList.add('cursor-pointer');
+        if (task.completed) row.classList.add('table-success');
+        
+        row.innerHTML = `
+          <td>
+            <div class="form-check">
+              <input class="form-check-input toggle-completion" type="checkbox" ${task.completed ? 'checked' : ''} 
+                data-task-id="${task.id}">
+            </div>
+          </td>
+          <td>
+            <span ${task.completed ? 'class="text-decoration-line-through"' : ''}>${task.title}</span>
+          </td>
+          <td>${formatDate(task.date)}</td>
+          <td>${task.startTime} - ${task.endTime}</td>
+          <td class="text-truncate" style="max-width: 200px;">${task.description}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1 edit-task" data-task-id="${task.id}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-task" data-task-id="${task.id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        
+        // Add event listeners
+        row.addEventListener('click', function() {
+          showTaskDetails(task.id);
+        });
+        
+        taskListBody.appendChild(row);
+      });
+      
+      // Add event listeners to buttons after rendering
+      addTaskButtonListeners();
+    }
+    
+    function addTaskButtonListeners() {
+      // Toggle completion
+      document.querySelectorAll('.toggle-completion').forEach(checkbox => {
+        checkbox.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const taskId = this.dataset.taskId;
+          const task = tasks.find(t => t.id === taskId);
+          if (task) {
+            task.completed = !task.completed;
+            renderTasks();
+          }
+        });
+      });
+      
+      // Edit task
+      document.querySelectorAll('.edit-task').forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const taskId = this.dataset.taskId;
+          editTask(taskId);
+        });
+      });
+      
+      // Delete task
+      document.querySelectorAll('.delete-task').forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const taskId = this.dataset.taskId;
+          if (confirm('Are you sure you want to delete this task?')) {
+            deleteTask(taskId);
+          }
+        });
+      });
+    }
+    
+    function showTaskDetails(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      
+      // Set modal content
+      detailTitle.textContent = task.title;
+      detailDate.textContent = formatDate(task.date);
+      detailTime.textContent = `${task.startTime} - ${task.endTime}`;
+      detailDescription.textContent = task.description;
+      
+      // Show/hide notes
+      if (task.notes) {
+        detailNotes.textContent = task.notes;
+        detailNotesContainer.style.display = 'block';
+      } else {
+        detailNotesContainer.style.display = 'none';
+      }
+      
+      // Show/hide status
+      if (task.completed) {
+        detailStatusCompleted.style.display = 'inline-block';
+        detailStatusActive.style.display = 'none';
+      } else {
+        detailStatusCompleted.style.display = 'none';
+        detailStatusActive.style.display = 'inline-block';
+      }
+      
+      // Set edit button task ID
+      detailEditBtn.dataset.taskId = taskId;
+      
+      // Show modal
+      taskDetailsModal.show();
+    }
+    
+    function editTask(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      
+      // Set form to edit mode
+      editingTaskId = taskId;
+      formTitle.textContent = 'Edit Task';
+      formSubtitle.textContent = 'Update your task details';
+      submitBtn.textContent = 'Update Task';
+      
+      // Fill form with task data
+      taskIdInput.value = task.id;
+      titleInput.value = task.title;
+      descriptionInput.value = task.description;
+      dateInput.value = task.date;
+      startTimeInput.value = task.startTime;
+      endTimeInput.value = task.endTime;
+      notesInput.value = task.notes;
+      completedInput.checked = task.completed;
+      
+      // Show completed checkbox for editing
+      completedContainer.style.display = 'block';
+      
+      // Show create view
+      showTaskCreateView();
+    }
+    
+    function createTask(taskData) {
+      // Generate unique ID
+      const newId = Date.now().toString();
+      
+      // Add task to array
+      tasks.push({
+        id: newId,
+        ...taskData
+      });
+    }
+    
+    function updateTask(taskId, taskData) {
+      const index = tasks.findIndex(t => t.id === taskId);
+      if (index !== -1) {
+        tasks[index] = {
+          ...tasks[index],
+          ...taskData
+        };
+      }
+    }
+    
+    function deleteTask(taskId) {
+      tasks = tasks.filter(t => t.id !== taskId);
+      renderTasks();
+    }
+    
+    function resetForm() {
+      // Reset form values
+      editingTaskId = null;
+      taskIdInput.value = '';
+      taskForm.reset();
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+      
+      // Reset to create mode
+      formTitle.textContent = 'Create New Task';
+      formSubtitle.textContent = 'Add a new task to your list';
+      submitBtn.textContent = 'Create Task';
+      
+      // Hide completed checkbox for new tasks
+      completedContainer.style.display = 'none';
+      
+      // Remove validation classes
+      titleInput.classList.remove('is-invalid');
+      descriptionInput.classList.remove('is-invalid');
+      dateInput.classList.remove('is-invalid');
+      startTimeInput.classList.remove('is-invalid');
+      endTimeInput.classList.remove('is-invalid');
+    }
+    
+    // Helper functions
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+    
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>
