@@ -32,7 +32,9 @@ export class TodoCreateComponent implements OnInit {
       if (params['id']) {
         this.editMode = true;
         this.taskId = params['id'];
+        if (this.taskId) {
         this.loadTaskData(this.taskId);
+}
       }
     });
   }

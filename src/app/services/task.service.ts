@@ -51,31 +51,56 @@ export class TaskService {
 
   // Load all tasks for the current user
   loadTasks(sortField: string = 'date', sortDirection: 'asc' | 'desc' = 'asc'): void {
+    console.log('Loading tasks with sort field:', sortField, 'direction:', sortDirection);
     const userId = this.authService.getCurrentUserId();
+    console.log('User ID for task loading:', userId);
     if (!userId) {
+      console.log('No user ID available, returning empty task list');
       this.tasksSubject.next([]);
       return;
     }
 
     this.loadingSubject.next(true);
 
-    // Create a query against the collection
+    // Create a query against the collection - simplified to avoid index requirements
     const tasksRef = collection(this.firestore, 'tasks');
+    // Query only by userId without orderBy to avoid needing a composite index
     const q = query(
       tasksRef, 
-      where("userId", "==", userId),
-      orderBy(sortField, sortDirection)
+      where("userId", "==", userId)
     );
+    console.log('Query created for tasks collection with userId filter');
 
     // Execute the query
     getDocs(q)
       .then((querySnapshot: QuerySnapshot<DocumentData>) => {
+        console.log('Query executed, document count:', querySnapshot.size);
         const tasks: Task[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data() as Omit<Task, 'id'>;
           tasks.push({ ...data, id: doc.id });
         });
-        this.tasksSubject.next(tasks);
+        
+        console.log('Raw tasks retrieved:', tasks);
+        
+        // Sort the tasks in memory instead of in the query
+        const sortedTasks = [...tasks].sort((a, b) => {
+          if (sortField === 'date') {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return sortDirection === 'asc' 
+              ? dateA.getTime() - dateB.getTime() 
+              : dateB.getTime() - dateA.getTime();
+          } else if (sortField === 'title') {
+            return sortDirection === 'asc'
+              ? a.title.localeCompare(b.title)
+              : b.title.localeCompare(a.title);
+          }
+          return 0;
+        });
+        
+        console.log('Sorted tasks:', sortedTasks);
+        this.tasksSubject.next(sortedTasks);
         this.loadingSubject.next(false);
       })
       .catch(error => {
@@ -103,16 +128,20 @@ export class TaskService {
 
   // Add a new task
   addTask(task: Omit<Task, 'id'>): Observable<string> {
+    console.log('Adding new task:', task);
     const userId = this.authService.getCurrentUserId();
+    console.log('Current user ID:', userId);
     if (!userId) {
       return throwError(() => new Error("User not authenticated"));
     }
 
     // Add userId to the task
     const taskWithUser = { ...task, userId };
+    console.log('Task with userId added:', taskWithUser);
 
     return from(addDoc(collection(this.firestore, 'tasks'), taskWithUser)).pipe(
       map(docRef => {
+        console.log('Task added successfully with ID:', docRef.id);
         // Refresh task list after adding
         this.loadTasks();
         return docRef.id;
@@ -166,38 +195,34 @@ export class TaskService {
 
   // Filter tasks by completion status
   filterByCompletion(showCompleted: boolean | null = null): void {
+    // Reuse our existing loadTasks method and filter in memory
+    this.loadingSubject.next(true);
+    
+    // Get all tasks first
     const userId = this.authService.getCurrentUserId();
     if (!userId) {
       this.tasksSubject.next([]);
       return;
     }
 
-    this.loadingSubject.next(true);
-
-    let q;
     const tasksRef = collection(this.firestore, 'tasks');
+    const q = query(tasksRef, where("userId", "==", userId));
     
-    if (showCompleted === null) {
-      // Show all tasks
-      q = query(tasksRef, where("userId", "==", userId));
-    } else {
-      // Filter by completion status
-      q = query(
-        tasksRef, 
-        where("userId", "==", userId),
-        where("completed", "==", showCompleted)
-      );
-    }
-
-    // Execute the query
     getDocs(q)
       .then((querySnapshot) => {
-        const tasks: Task[] = [];
+        const allTasks: Task[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data() as Omit<Task, 'id'>;
-          tasks.push({ ...data, id: doc.id });
+          allTasks.push({ ...data, id: doc.id });
         });
-        this.tasksSubject.next(tasks);
+        
+        // Filter in memory if needed
+        let filteredTasks = allTasks;
+        if (showCompleted !== null) {
+          filteredTasks = allTasks.filter(task => task.completed === showCompleted);
+        }
+        
+        this.tasksSubject.next(filteredTasks);
         this.loadingSubject.next(false);
       })
       .catch(error => {
